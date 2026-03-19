@@ -4,66 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MeuMobills</title>
-    
-    <!-- PWA META TAGS -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="MeuMobills">
-    
     <style>
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
-            max-width: 400px; margin: 0 auto; padding: 20px; background: #f8f9fa;
+            max-width: 400px; margin: 0 auto; padding: 20px; background: #f8f9fa; min-height: 100vh;
         }
         .header { text-align: center; padding: 20px 0; }
-        .gasto { background: white; margin: 10px 0; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .gasto { 
+            background: white; margin: 10px 0; padding: 15px; border-radius: 12px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;
+        }
+        .gasto:hover { transform: translateY(-2px); }
         .alert { color: #dc3545; font-weight: bold; }
         button { 
             background: linear-gradient(45deg, #007bff, #0056b3); 
-            color: white; border: none; padding: 12px 20px; border-radius: 8px; 
-            cursor: pointer; font-weight: 600; transition: all 0.2s;
+            color: white; border: none; padding: 14px 24px; border-radius: 12px; 
+            cursor: pointer; font-weight: 600; font-size: 16px; width: 100%; margin: 10px 0;
+            transition: all 0.3s;
         }
-        button:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,123,255,0.4); }
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,123,255,0.4); }
         button:active { transform: translateY(0); }
         input, select { 
-            width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; 
-            border: 2px solid #e9ecef; font-size: 16px;
+            width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; 
+            border: 2px solid #e9ecef; font-size: 16px; background: white;
         }
-        input:focus, select:focus { border-color: #007bff; outline: none; }
-        .renda-input { display: inline-block; width: 180px; }
-        h3 { margin-top: 25px; color: #333; }
+        input:focus, select:focus { border-color: #007bff; outline: none; box-shadow: 0 0 0 3px rgba(0,123,255,0.1); }
+        .renda-input { display: inline-block; width: 200px; }
+        h3 { margin: 25px 0 15px 0; color: #333; font-size: 18px; }
         #gastos-container {
-            max-height: 300px; overflow-y: auto; border: 1px solid #dee2e6;
-            border-radius: 12px; padding: 15px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            max-height: 350px; overflow-y: auto; border: 1px solid #dee2e6;
+            border-radius: 12px; padding: 0; background: white;
         }
+        .gastos-inner { padding: 15px; }
         #gastos-container::-webkit-scrollbar { width: 6px; }
-        #gastos-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        #gastos-container::-webkit-scrollbar-track { background: #f8f9fa; border-radius: 10px; }
         #gastos-container::-webkit-scrollbar-thumb { 
             background: linear-gradient(45deg, #007bff, #0056b3); border-radius: 10px; 
         }
-        .fab { 
-            position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; 
-            background: linear-gradient(45deg, #28a745, #20c997); border-radius: 50%; 
-            box-shadow: 0 4px 20px rgba(40,167,69,0.4); cursor: pointer;
+        #resumo { 
+            background: linear-gradient(135deg, #007bff, #0056b3); 
+            color: white; padding: 25px; border-radius: 16px; text-align: center; margin: 20px 0;
+            box-shadow: 0 8px 32px rgba(0,123,255,0.3);
+        }
+        .delete-btn { 
+            background: #dc3545 !important; padding: 6px 12px !important; 
+            font-size: 14px !important; width: auto !important; float: right;
         }
         @media (max-width: 480px) { body { padding: 15px; } }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>💰 MeuMobills</h1>
-        <p>Seu controle financeiro</p>
+        <h1 style="margin:0;font-size:28px;">💰 MeuMobills</h1>
+        <p style="color:#666;margin:5px 0 0 0;">Controle financeiro pessoal</p>
     </div>
     
     <h3>Renda Mensal</h3>
     <div>R$ <input type="number" id="renda" class="renda-input" step="0.01" min="0" placeholder="5000"></div>
     
-    <h3>+ Novo Gasto</h3>
-    <input type="text" id="desc" placeholder="Descrição do gasto">
-    <input type="number" id="valor" placeholder="25.50" step="0.01" min="0">
+    <h3>Novo Gasto</h3>
+    <input type="text" id="desc" placeholder="Descrição (ex: Almoço Mc)" maxlength="50">
+    <input type="number" id="valor" placeholder="25.50" step="0.01" min="0.01">
     <select id="cat">
         <option>Despesas</option>
         <option>Transporte</option>
@@ -71,24 +76,26 @@
         <option>Água</option>
         <option>Luz</option>
         <option>Aluguel</option>
+        <option>Internet</option>
+        <option>Supermercado</option>
     </select>
     <button onclick="addGasto()">➕ Adicionar Gasto</button>
     
-    <h3>📊 Resumo Mensal</h3>
-    <div id="resumo" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></div>
+    <div id="resumo"></div>
     
-    <h3>📈 Últimos Gastos</h3>
+    <h3>Últimos Gastos</h3>
     <div id="gastos-container">
-        <div id="gastos"></div>
+        <div class="gastos-inner">
+            <div id="gastos"></div>
+        </div>
     </div>
-    
-    <!-- FAB (Floating Action Button) -->
-    <button class="fab" onclick="addGasto()" title="Novo Gasto">+</button>
 
     <script>
-        // Service Worker para PWA
+        // PWA Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
+            navigator.serviceWorker.register('/sw.js')
+                .then(() => console.log('SW registrado!'))
+                .catch(err => console.log('SW erro:', err));
         }
 
         let gastos = JSON.parse(localStorage.getItem('gastos')) || [];
@@ -107,30 +114,27 @@
         
         function addGasto() {
             let desc = document.getElementById('desc').value.trim();
-            let valor = parseFloat(document.getElementById('valor').value) || 0;
+            let valor = parseFloat(document.getElementById('valor').value);
             
-            if (!desc || valor <= 0) {
-                alert('Preencha descrição e valor válido!');
+            if (!desc || !valor || valor <= 0) {
+                alert('✅ Preencha descrição e valor válido!');
                 return;
             }
             
             let novo = {
                 id: Date.now(),
-                desc: desc,
+                desc: desc.substring(0, 30) + (desc.length > 30 ? '...' : ''),
                 valor: valor,
                 cat: document.getElementById('cat').value,
                 data: new Date().toLocaleDateString('pt-BR')
             };
             
-            gastos.push(novo);
+            gastos.unshift(novo); // Adiciona no INÍCIO
             localStorage.setItem('gastos', JSON.stringify(gastos));
             
             document.getElementById('desc').value = '';
             document.getElementById('valor').value = '';
             atualiza();
-            
-            // Scroll suave pro topo dos gastos
-            document.getElementById('gastos-container').scrollTop = 0;
         }
         
         function atualiza() {
@@ -139,33 +143,34 @@
             let restante = Math.max(0, rendaMensal - totalGastos);
             
             document.getElementById('resumo').innerHTML = `
-                <div style="text-align:center;">
-                    <h2 style="margin:0;color:#007bff">R$ ${totalGastos.toFixed(2)}</h2>
-                    <p style="color:#666;margin:5px 0">Gastos Totais</p>
-                    <div style="display:flex;justify-content:space-around;margin:15px 0;">
-                        <div><strong>${porcentagem}%</strong><br>Usado</div>
-                        <div style="color:#28a745"><strong>R$ ${restante.toFixed(2)}</strong><br>Restante</div>
-                    </div>
-                    ${porcentagem > 90 ? '<p class="alert">🚨 ORÇAMENTO QUASE ESTOURADO!</p>' : ''}
+                <h2 style="margin:0 0 10px 0;font-size:32px;">R$ ${totalGastos.toFixed(2)}</h2>
+                <p style="margin:5px 0;font-size:14px;opacity:0.9;">Gastos totais</p>
+                <div style="display:flex;justify-content:space-around;margin:20px 0;font-size:14px;">
+                    <div><strong style="font-size:24px">${porcentagem}%</strong><br>Usado</div>
+                    <div style="color:#28a745"><strong style="font-size:24px">R$ ${restante.toFixed(2)}</strong><br>Restante</div>
                 </div>
+                ${porcentagem > 90 ? '<p class="alert" style="margin:0;font-size:16px;">🚨 ORÇAMENTO QUASE ESTOURADO!</p>' : ''}
             `;
             
             let lista = '';
-            gastos.slice(-20).reverse().forEach(g => {
+            gastos.slice(0, 25).forEach(g => {
                 lista += `<div class="gasto">
-                    <div style="display:flex;justify-content:space-between;align-items:center;">
-                        <div>
-                            <strong>${g.data}</strong><br>
-                            <small>${g.desc} • R$ ${g.valor.toFixed(2)}</small>
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                        <div style="flex:1;">
+                            <div style="font-weight:600;font-size:16px;margin-bottom:4px">${g.data}</div>
+                            <div style="color:#666;font-size:14px">${g.desc}</div>
                         </div>
-                        <div style="color:#007bff;font-weight:bold">${g.cat}</div>
+                        <div style="text-align:right;margin-left:10px;">
+                            <div style="font-size:18px;font-weight:bold;color:#333">R$ ${g.valor.toFixed(2)}</div>
+                            <div style="color:#007bff;font-size:12px;font-weight:500">${g.cat}</div>
+                        </div>
                     </div>
-                    <button onclick="removeGasto(${g.id})" style="float:right;background:#dc3545;font-size:12px;padding:5px 12px;margin-top:8px">✕</button>
+                    <button class="delete-btn" onclick="removeGasto(${g.id})">✕ Remover</button>
                 </div>`;
             });
             
             if (gastos.length === 0) {
-                lista = '<div style="text-align:center;padding:30px;color:#666"><p>Nenhum gasto ainda!</p><p>🎉 Adicione o primeiro</p></div>';
+                lista = '<div style="text-align:center;padding:40px 20px;color:#666"><div style="font-size:48px;margin-bottom:15px">🎉</div><p>Nenhum gasto cadastrado<br>Adicione o primeiro!</p></div>';
             }
             
             document.getElementById('gastos').innerHTML = lista;
@@ -177,9 +182,16 @@
             atualiza();
         }
         
+        // Enter adiciona gasto
         document.getElementById('valor').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') addGasto();
         });
+        
+        // Auto-save a cada 30s
+        setInterval(() => {
+            localStorage.setItem('gastos', JSON.stringify(gastos));
+            localStorage.setItem('rendaMensal', rendaMensal);
+        }, 30000);
     </script>
 </body>
 </html>
