@@ -2,7 +2,7 @@
     "name": "MeuMobills",
     "short_name": "Mobills",
     "description": "Seu controle financeiro pessoal",
-    "start_url": "meu-mobills-pwa.html",
+    "start_url": "./index.html",
     "display": "standalone",
     "background_color": "#f8f9fa",
     "theme_color": "#007bff",

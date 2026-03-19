@@ -1,7 +1,7 @@
 const CACHE_NAME = 'meu-mobills-v1';
 const urlsToCache = [
-    'meu-mobills-pwa.html',
-    'manifest.json'
+    './index.html',
+    './manifest.json'
 ];
 
 self.addEventListener('install', event => {
