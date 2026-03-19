@@ -3,87 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MeuMobills</title>
+    <title>MeuMobills PRO</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
+        :root {
+            --bg-primary: #f8f9fa;
+            --bg-secondary: white;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --border: #dee2e6;
+            --primary: #007bff;
+            --success: #28a745;
+            --danger: #dc3545;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        [data-theme="dark"] {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --text-primary: #e9ecef;
+            --text-secondary: #adb5bd;
+            --border: #495057;
+            --primary: #4dabf7;
+            --success: #51cf66;
+            --danger: #f87171;
+            --shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
-            max-width: 400px; margin: 0 auto; padding: 20px; background: #f8f9fa; min-height: 100vh;
+            max-width: 420px; margin: 0 auto; padding: 15px; 
+            background: var(--bg-primary); color: var(--text-primary); min-height: 100vh;
+            transition: all 0.3s ease;
         }
-        .header { text-align: center; padding: 20px 0; }
+        .header { text-align: center; padding: 25px 0; }
+        .card { 
+            background: var(--bg-secondary); border-radius: 16px; padding: 20px; 
+            margin: 15px 0; box-shadow: var(--shadow); border: 1px solid var(--border);
+        }
         .gasto { 
-            background: white; margin: 10px 0; padding: 15px; border-radius: 12px; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;
+            background: var(--bg-secondary); margin: 8px 0; padding: 15px; 
+            border-radius: 12px; border-left: 4px solid var(--primary); 
+            transition: all 0.2s;
         }
-        .gasto:hover { transform: translateY(-2px); }
-        .alert { color: #dc3545; font-weight: bold; }
+        .gasto:hover { transform: translateX(4px); box-shadow: var(--shadow); }
         button { 
-            background: linear-gradient(45deg, #007bff, #0056b3); 
-            color: white; border: none; padding: 14px 24px; border-radius: 12px; 
-            cursor: pointer; font-weight: 600; font-size: 16px; width: 100%; margin: 10px 0;
-            transition: all 0.3s;
+            background: linear-gradient(45deg, var(--primary), #0056b3); 
+            color: white; border: none; padding: 12px 20px; border-radius: 10px; 
+            cursor: pointer; font-weight: 600; font-size: 15px; transition: all 0.3s;
+            border: none; width: 100%; margin: 5px 0;
         }
         button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,123,255,0.4); }
         button:active { transform: translateY(0); }
+        .btn-small { width: auto; padding: 6px 12px; font-size: 13px; margin-left: 10px; }
+        .btn-success { background: linear-gradient(45deg, var(--success), #20c997); }
+        .btn-danger { background: linear-gradient(45deg, var(--danger), #c53030); }
         input, select { 
-            width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; 
-            border: 2px solid #e9ecef; font-size: 16px; background: white;
+            width: 100%; padding: 14px; margin: 6px 0; border-radius: 10px; 
+            border: 2px solid var(--border); font-size: 16px; background: var(--bg-secondary);
+            color: var(--text-primary);
         }
-        input:focus, select:focus { border-color: #007bff; outline: none; box-shadow: 0 0 0 3px rgba(0,123,255,0.1); }
+        input:focus, select:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(0,123,255,0.1); }
         .renda-input { display: inline-block; width: 200px; }
-        h3 { margin: 25px 0 15px 0; color: #333; font-size: 18px; }
+        h2 { font-size: 24px; margin: 0 0 10px 0; }
+        h3 { margin: 25px 0 15px 0; font-size: 18px; color: var(--text-primary); }
         #gastos-container {
-            max-height: 350px; overflow-y: auto; border: 1px solid #dee2e6;
-            border-radius: 12px; padding: 0; background: white;
+            max-height: 320px; overflow-y: auto; border-radius: 12px; 
+            background: var(--bg-secondary); border: 1px solid var(--border);
         }
         .gastos-inner { padding: 15px; }
         #gastos-container::-webkit-scrollbar { width: 6px; }
-        #gastos-container::-webkit-scrollbar-track { background: #f8f9fa; border-radius: 10px; }
-        #gastos-container::-webkit-scrollbar-thumb { 
-            background: linear-gradient(45deg, #007bff, #0056b3); border-radius: 10px; 
-        }
-        #resumo { 
-            background: linear-gradient(135deg, #007bff, #0056b3); 
-            color: white; padding: 25px; border-radius: 16px; text-align: center; margin: 20px 0;
-            box-shadow: 0 8px 32px rgba(0,123,255,0.3);
-        }
-        .delete-btn { 
-            background: #dc3545 !important; padding: 6px 12px !important; 
-            font-size: 14px !important; width: auto !important; float: right;
-        }
-        @media (max-width: 480px) { body { padding: 15px; } }
+        #gastos-container::-webkit-scrollbar-track { background: var(--bg-primary); border-radius: 10px; }
+        #gastos-container::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+        #chart-container { height: 250px; position: relative; }
+        .filters { display: flex; gap: 10px; flex-wrap: wrap; }
+        .filter-btn { padding: 8px 12px; font-size: 13px; opacity: 0.7; }
+        .filter-btn.active { background: var(--primary); opacity: 1; color: white; }
+        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0; }
+        .stat { text-align: center; padding: 15px; background: var(--bg-secondary); border-radius: 12px; }
+        .theme-toggle { position: fixed; top: 20px; right: 20px; background: none; border: 2px solid var(--primary); width: 50px; height: 50px; border-radius: 50%; cursor: pointer; }
+        .export-btns { display: flex; gap: 10px; }
+        @media (max-width: 480px) { body { padding: 10px; } }
     </style>
 </head>
 <body>
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">🌙</button>
+    
     <div class="header">
-        <h1 style="margin:0;font-size:28px;">💰 MeuMobills</h1>
-        <p style="color:#666;margin:5px 0 0 0;">Controle financeiro pessoal</p>
+        <h1 style="margin:0;font-size:28px;">💰 MeuMobills PRO</h1>
+        <p style="color:var(--text-secondary);margin:5px 0 0 0;">Controle financeiro completo</p>
     </div>
     
-    <h3>Renda Mensal</h3>
-    <div>R$ <input type="number" id="renda" class="renda-input" step="0.01" min="0" placeholder="5000"></div>
+    <!-- Renda -->
+    <div class="card">
+        <h3>💵 Renda Mensal</h3>
+        <div>R$ <input type="number" id="renda" class="renda-input" step="0.01" min="0" placeholder="5000"></div>
+    </div>
     
-    <h3>Novo Gasto</h3>
-    <input type="text" id="desc" placeholder="Descrição (ex: Almoço Mc)" maxlength="50">
-    <input type="number" id="valor" placeholder="25.50" step="0.01" min="0.01">
-    <select id="cat">
-        <option>Despesas</option>
-        <option>Transporte</option>
-        <option>Lazer</option>
-        <option>Água</option>
-        <option>Luz</option>
-        <option>Aluguel</option>
-        <option>Internet</option>
-        <option>Supermercado</option>
-    </select>
-    <button onclick="addGasto()">➕ Adicionar Gasto</button>
+    <!-- Novo Gasto -->
+    <div class="card">
+        <h3>➕ Novo Gasto</h3>
+        <input type="text" id="desc" placeholder="Descrição (ex: Almoço McDonald's)" maxlength="60">
+        <input type="number" id="valor" placeholder="25.50" step="0.01" min="0.01">
+        <select id="cat">
+            <option value="all">Todas Categorias</option>
+            <option>Despesas</option>
+            <option>Transporte</option>
+            <option>Lazer</option>
+            <option>Água</option>
+            <option>Luz</option>
+            <option>Aluguel</option>
+            <option>Internet</option>
+            <option>Supermercado</option>
+        </select>
+        <button onclick="addGasto()">➕ Adicionar Gasto</button>
+    </div>
     
-    <div id="resumo"></div>
+    <!-- Stats + Gráfico -->
+    <div class="card">
+        <div class="stats">
+            <div class="stat">
+                <div id="totalGastos" style="font-size:32px;font-weight:bold;color:var(--primary);">R$ 0</div>
+                <div style="color:var(--text-secondary);">Gastos Totais</div>
+            </div>
+            <div class="stat">
+                <div id="restante" style="font-size:32px;font-weight:bold;color:var(--success);">R$ 0</div>
+                <div style="color:var(--text-secondary);">Restante</div>
+            </div>
+        </div>
+        <div id="chart-container">
+            <canvas id="pizzaChart"></canvas>
+        </div>
+    </div>
     
-    <h3>Últimos Gastos</h3>
+    <!-- Filtros -->
+    <div class="filters" id="filters"></div>
+    
+    <!-- Export -->
+    <div class="card">
+        <div class="export-btns">
+            <button class="btn-success" onclick="exportPDF()">📄 Export PDF</button>
+            <button onclick="exportCSV()">📊 Export CSV</button>
+            <button onclick="backupData()">💾 Backup Sync</button>
+        </div>
+    </div>
+    
+    <!-- Gastos -->
+    <h3>📈 Últimos Gastos</h3>
     <div id="gastos-container">
         <div class="gastos-inner">
             <div id="gastos"></div>
@@ -91,20 +160,34 @@
     </div>
 
     <script>
-        // PWA Service Worker
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js')
-                .then(() => console.log('SW registrado!'))
-                .catch(err => console.log('SW erro:', err));
-        }
-
         let gastos = JSON.parse(localStorage.getItem('gastos')) || [];
         let rendaMensal = parseFloat(localStorage.getItem('rendaMensal')) || 5000;
+        let filtroAtual = 'all';
+        let chart = null;
         
+        // PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+        }
+        
+        // Carrega
         window.onload = function() {
             document.getElementById('renda').value = rendaMensal;
+            criaFiltros();
             atualiza();
         };
+        
+        // Theme
+        function toggleTheme() {
+            document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', document.body.dataset.theme);
+            chart?.update('none');
+        }
+        
+        // Load theme
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.dataset.theme = 'dark';
+        }
         
         document.getElementById('renda').addEventListener('change', function() {
             rendaMensal = parseFloat(this.value) || 0;
@@ -117,60 +200,107 @@
             let valor = parseFloat(document.getElementById('valor').value);
             
             if (!desc || !valor || valor <= 0) {
-                alert('✅ Preencha descrição e valor válido!');
+                alert('Preencha descrição e valor válido!');
                 return;
             }
             
             let novo = {
                 id: Date.now(),
-                desc: desc.substring(0, 30) + (desc.length > 30 ? '...' : ''),
+                desc: desc.substring(0, 35) + (desc.length > 35 ? '...' : ''),
                 valor: valor,
                 cat: document.getElementById('cat').value,
                 data: new Date().toLocaleDateString('pt-BR')
             };
             
-            gastos.unshift(novo); // Adiciona no INÍCIO
+            gastos.unshift(novo);
             localStorage.setItem('gastos', JSON.stringify(gastos));
             
             document.getElementById('desc').value = '';
             document.getElementById('valor').value = '';
             atualiza();
+            
+            // Notificação 90%
+            if ((getTotalGastos() / rendaMensal) > 0.9 && Notification.permission === 'granted') {
+                new Notification('🚨 MeuMobills', {
+                    body: '90% do orçamento usado!',
+                    icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiNkYzM1NDUiLz4KPHRleHQgeD0iOTYiIHk9IjEyMCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+OTAlPC90ZXh0Pgo8L3N2Zz4K'
+                });
+            }
+        }
+        
+        function criaFiltros() {
+            const cats = [...new Set(gastos.map(g => g.cat))];
+            const filters = document.getElementById('filters');
+            filters.innerHTML = '<button class="filter-btn active" onclick="setFiltro(\'all\')">Todas</button>';
+            cats.forEach(cat => {
+                filters.innerHTML += `<button class="filter-btn" onclick="setFiltro('${cat}')">${cat}</button>`;
+            });
+        }
+        
+        function setFiltro(cat) {
+            filtroAtual = cat;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            atualiza();
+        }
+        
+        function getTotalGastos(filtro = filtroAtual) {
+            return gastos.filter(g => filtro === 'all' || g.cat === filtro)
+                .reduce((sum, g) => sum + g.valor, 0);
         }
         
         function atualiza() {
-            let totalGastos = gastos.reduce((sum, g) => sum + g.valor, 0);
+            let totalGastos = getTotalGastos();
             let porcentagem = rendaMensal > 0 ? (totalGastos / rendaMensal * 100).toFixed(1) : 0;
             let restante = Math.max(0, rendaMensal - totalGastos);
             
-            document.getElementById('resumo').innerHTML = `
-                <h2 style="margin:0 0 10px 0;font-size:32px;">R$ ${totalGastos.toFixed(2)}</h2>
-                <p style="margin:5px 0;font-size:14px;opacity:0.9;">Gastos totais</p>
-                <div style="display:flex;justify-content:space-around;margin:20px 0;font-size:14px;">
-                    <div><strong style="font-size:24px">${porcentagem}%</strong><br>Usado</div>
-                    <div style="color:#28a745"><strong style="font-size:24px">R$ ${restante.toFixed(2)}</strong><br>Restante</div>
-                </div>
-                ${porcentagem > 90 ? '<p class="alert" style="margin:0;font-size:16px;">🚨 ORÇAMENTO QUASE ESTOURADO!</p>' : ''}
-            `;
+            document.getElementById('totalGastos').textContent = `R$ ${totalGastos.toFixed(2)}`;
+            document.getElementById('restante').textContent = `R$ ${restante.toFixed(2)}`;
             
-            let lista = '';
-            gastos.slice(0, 25).forEach(g => {
-                lista += `<div class="gasto">
-                    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-                        <div style="flex:1;">
-                            <div style="font-weight:600;font-size:16px;margin-bottom:4px">${g.data}</div>
-                            <div style="color:#666;font-size:14px">${g.desc}</div>
-                        </div>
-                        <div style="text-align:right;margin-left:10px;">
-                            <div style="font-size:18px;font-weight:bold;color:#333">R$ ${g.valor.toFixed(2)}</div>
-                            <div style="color:#007bff;font-size:12px;font-weight:500">${g.cat}</div>
-                        </div>
-                    </div>
-                    <button class="delete-btn" onclick="removeGasto(${g.id})">✕ Remover</button>
-                </div>`;
+            // Gráfico Pizza
+            const ctx = document.getElementById('pizzaChart').getContext('2d');
+            const dadosCat = {};
+            gastos.filter(g => filtroAtual === 'all' || g.cat === filtroAtual)
+                .forEach(g => dadosCat[g.cat] = (dadosCat[g.cat] || 0) + g.valor);
+            
+            if (chart) chart.destroy();
+            chart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(dadosCat),
+                    datasets: [{
+                        data: Object.values(dadosCat),
+                        backgroundColor: ['#007bff','#28a745','#ffc107','#dc3545','#6f42c1','#fd7e14','#20c997','#e83e8c']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: getComputedStyle(document.body).getPropertyValue('--text-primary') } } }
+                }
             });
             
-            if (gastos.length === 0) {
-                lista = '<div style="text-align:center;padding:40px 20px;color:#666"><div style="font-size:48px;margin-bottom:15px">🎉</div><p>Nenhum gasto cadastrado<br>Adicione o primeiro!</p></div>';
+            // Lista gastos
+            let lista = '';
+            gastos.filter(g => filtroAtual === 'all' || g.cat === filtroAtual)
+                .slice(0, 30).forEach(g => {
+                    lista += `<div class="gasto">
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <div style="flex:1;">
+                                <div style="font-weight:600;font-size:15px">${g.data}</div>
+                                <div style="color:var(--text-secondary);font-size:13px">${g.desc}</div>
+                            </div>
+                            <div style="text-align:right;min-width:80px;">
+                                <div style="font-size:18px;font-weight:bold">R$ ${g.valor.toFixed(2)}</div>
+                                <span style="background:var(--primary);color:white;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:500">${g.cat}</span>
+                            </div>
+                        </div>
+                        <button class="btn-danger btn-small" onclick="removeGasto(${g.id})">✕</button>
+                    </div>`;
+                });
+            
+            if (lista === '') {
+                lista = '<div style="text-align:center;padding:40px;color:var(--text-secondary)"><div style="font-size:48px;margin-bottom:15px">🎉</div><p>Sem gastos nesta categoria</p></div>';
             }
             
             document.getElementById('gastos').innerHTML = lista;
@@ -180,14 +310,97 @@
             gastos = gastos.filter(g => g.id !== id);
             localStorage.setItem('gastos', JSON.stringify(gastos));
             atualiza();
+            criaFiltros();
         }
         
-        // Enter adiciona gasto
-        document.getElementById('valor').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') addGasto();
+        // Export PDF
+        function exportPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFontSize(20);
+            doc.text('MeuMobills - Relatório', 20, 20);
+            doc.setFontSize(12);
+            doc.text(`Renda: R$ ${rendaMensal.toFixed(2)}`, 20, 40);
+            doc.text(`Gastos: R$ ${getTotalGastos().toFixed(2)}`, 20, 50);
+            doc.text(`Restante: R$ ${Math.max(0, rendaMensal - getTotalGastos()).toFixed(2)}`, 20, 60);
+            
+            let y = 80;
+            gastos.slice(0, 20).forEach((g, i) => {
+                if (y > 270) {
+                    doc.addPage();
+                    y = 20;
+                }
+                doc.text(`${g.data} - ${g.desc} - R$ ${g.valor.toFixed(2)} (${g.cat})`, 20, y);
+                y += 8;
+            });
+            doc.save(`meu-mobills-${new Date().toISOString().slice(0,10)}.pdf`);
+        }
+        // Export CSV
+        function exportCSV() {
+            let csv = 'Data,Descrição,Valor,Categoria\n';
+            gastos.slice(0, 100).forEach(g => {
+                csv += `${g.data},"${g.desc}",${g.valor},"${g.cat}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `meu-mobills-${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+        }
+        
+        // Backup Sync
+        function backupData() {
+            const data = {
+                gastos: gastos,
+                rendaMensal: rendaMensal,
+                timestamp: new Date().toISOString()
+            };
+            const str = btoa(JSON.stringify(data));
+            navigator.clipboard.writeText(str).then(() => {
+                alert('✅ Backup copiado! Cole em outro dispositivo.');
+            });
+        }
+        
+        // Import Sync
+        function importData() {
+            const input = prompt('Cole backup aqui:');
+            if (input) {
+                try {
+                    const data = JSON.parse(atob(input));
+                    gastos = data.gastos || [];
+                    rendaMensal = data.rendaMensal || 5000;
+                    localStorage.setItem('gastos', JSON.stringify(gastos));
+                    localStorage.setItem('rendaMensal', rendaMensal);
+                    document.getElementById('renda').value = rendaMensal;
+                    atualiza();
+                    criaFiltros();
+                    alert('✅ Dados importados!');
+                } catch(e) {
+                    alert('❌ Backup inválido!');
+                }
+            }
+        }
+        
+        // Notificações
+        if (Notification.permission !== 'granted') {
+            Notification.requestPermission();
+        }
+        
+        // Hotkeys
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && document.activeElement.id === 'valor') {
+                addGasto();
+            }
+            if (e.ctrlKey && e.key === 'p') {
+                exportPDF();
+            }
+            if (e.ctrlKey && e.key === 's') {
+                backupData();
+            }
         });
         
-        // Auto-save a cada 30s
+        // Auto-save
         setInterval(() => {
             localStorage.setItem('gastos', JSON.stringify(gastos));
             localStorage.setItem('rendaMensal', rendaMensal);
@@ -195,3 +408,10 @@
     </script>
 </body>
 </html>
+
+
+
+
+
+
+                                                                   
